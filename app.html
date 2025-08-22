@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ADR Case Analyzer – by Àrî</title>
+    <style>
+        /* (All your great CSS remains unchanged) */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            color: #1e293b;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(37, 99, 235, 0.2);
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .nav-tabs {
+            display: flex;
+            background: white;
+            border-radius: 12px;
+            padding: 8px;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+            gap: 8px;
+        }
+
+        .nav-tab {
+            flex: 1;
+            padding: 12px 24px;
+            border: none;
+            background: transparent;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #64748b;
+        }
+
+        .nav-tab.active {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+
+        .nav-tab:hover:not(.active) {
+            background: #f1f5f9;
+            color: #2563eb;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            margin-bottom: 2rem;
+            border: 1px solid #e2e8f0;
+        }
+
+        .card h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .card h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 1rem;
+        }
+
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .input-group input {
+            width: 100%;
+            padding: 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: all 0.3s ease;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .input-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #374151;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 1rem;
+            resize: vertical;
+            min-height: 150px;
+            font-family: inherit;
+            transition: all 0.3s ease;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #4b5563;
+            transform: translateY(-2px);
+        }
+
+        .btn-export {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            color: white;
+            font-size: 0.9rem;
+            padding: 10px 20px;
+        }
+
+        .btn-export:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(5, 150, 105, 0.3);
+        }
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .stats-card {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border: 2px solid #0ea5e9;
+            border-radius: 16px;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .stats-number {
+            font-size: 3rem;
+            font-weight: 800;
+            color: #0369a1;
+            margin-bottom: 0.5rem;
+        }
+
+        .stats-label {
+            font-size: 1.1rem;
+            color: #0c4a6e;
+            font-weight: 600;
+        }
+        .adr-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 1rem;
+        }
+
+        .adr-tag {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            border: 2px solid;
+        }
+
+        .adr-serious {
+            background: #fef2f2;
+            color: #dc2626;
+            border-color: #fca5a5;
+        }
+
+        .adr-non-serious {
+            background: #f0fdf4;
+            color: #16a34a;
+            border-color: #86efac;
+        }
+        .highlighted-text {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 1.5rem;
+            line-height: 1.8;
+            font-size: 1.1rem;
+            margin-top: 1rem;
+        }
+
+        .highlight-serious {
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+            color: #dc2626;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-weight: 600;
+            border: 1px solid #fca5a5;
+        }
+
+        .highlight-non-serious {
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            color: #16a34a;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-weight: 600;
+            border: 1px solid #86efac;
+        }
+        .case-history {
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 1rem;
+        }
+
+        .case-item {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .case-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        .case-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .case-id {
+            font-weight: 700;
+            color: #2563eb;
+        }
+
+        .case-date {
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+
+        .case-stats {
+            display: flex;
+            gap: 1rem;
+            margin-top: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .case-stat {
+            background: white;
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            border: 1px solid #e5e7eb;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .spinner {
+            border: 4px solid #f3f4f6;
+            border-top: 4px solid #2563eb;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .nav-tabs {
+                flex-direction: column;
+                gap: 4px;
+            }
+
+            .nav-tab {
+                text-align: center;
+            }
+
+            .card {
+                padding: 1.5rem;
+            }
+
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .case-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+
+            .case-stats {
+                gap: 0.5rem;
+            }
+        }
+        .icon {
+            width: 24px;
+            height: 24px;
+            fill: currentColor;
+        }
+    </style>
+<!-- NEW: PDF.js Library from a CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>ADR Case Analyzer</h1>
+            <p>Advanced Pharmacovigilance Tool – by Àrî</p>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="switchTab('analyzer')">
+                📊 ADR Analyzer
+            </button>
+            <button class="nav-tab" onclick="switchTab('dashboard')">
+                📈 Dashboard
+            </button>
+        </div>
+
+        <!-- Analyzer Tab -->
+        <div id="analyzer" class="tab-content active">
+            <!-- Input Section -->
+            <div class="card">
+                <h2>📄 Case Narrative Input</h2>
+                <div class="input-group">
+                    <label for="caseId">Case ID (Optional)</label>
+                    <input type="text" id="caseId" placeholder="e.g., US-COMPANY-2025-00123">
+                </div>
+                <div class="input-group">
+                    <label for="caseText">Paste your pharmacovigilance case narrative below:</label>
+                    <textarea id="caseText" placeholder="Example: The patient developed severe headache and nausea after taking paracetamol..."></textarea>
+                </div>
+                
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="analyzeCaseText()">
+                        🔍 Analyze ADRs
+                    </button>
+                    <button class="btn btn-secondary" onclick="openFilePicker()">
+                        📂 Choose File
+                    </button>
+                </div>
+                <!-- MODIFIED: The 'accept' attribute is now more inclusive -->
+                <input type="file" id="fileInput" accept="application/pdf,.txt,.text" style="display: none;">
+            </div>
+
+            <!-- (The rest of your HTML remains unchanged) -->
+            <div id="loadingState" class="loading">
+                <div class="spinner"></div>
+                <p>Analyzing case narrative for ADRs...</p>
+            </div>
+            <div id="resultsSection" style="display: none;">
+                <div class="results-grid">
+                    <div class="stats-card">
+                        <div class="stats-number" id="totalADRs">0</div>
+                        <div class="stats-label">Total ADRs Detected</div>
+                    </div>
+                    <div class="stats-card">
+                        <div class="stats-number" id="seriousADRs">0</div>
+                        <div class="stats-label">Serious ADRs</div>
+                    </div>
+                    <div class="stats-card">
+                        <div class="stats-number" id="nonSeriousADRs">0</div>
+                        <div class="stats-label">Non-Serious ADRs</div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <h2>📋 Detected ADRs</h2>
+                        <button class="btn btn-export" onclick="exportResults()">
+                            ⬇️ Export CSV
+                        </button>
+                    </div>
+                    <div id="adrList" class="adr-list"></div>
+                </div>
+                <div class="card">
+                    <h2>🔍 Highlighted Case Narrative</h2>
+                    <div id="highlightedText" class="highlighted-text"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Tab -->
+        <div id="dashboard" class="tab-content">
+            <div class="card">
+                <h2>📊 Case Analysis Dashboard</h2>
+                <div class="results-grid">
+                    <div class="stats-card">
+                        <div class="stats-number" id="dashboardTotalCases">0</div>
+                        <div class="stats-label">Total Cases Analyzed</div>
+                    </div>
+                    <div class="stats-card">
+                        <div class="stats-number" id="dashboardTotalADRs">0</div>
+                        <div class="stats-label">Total ADRs Found</div>
+                    </div>
+                    <div class="stats-card">
+                        <div class="stats-number" id="dashboardAvgADRs">0</div>
+                        <div class="stats-label">Avg ADRs per Case</div>
+                    </div>
+                </div>
+                <h3>Recent Case Analysis History</h3>
+                <div id="caseHistory" class="case-history"></div>
+                <div style="margin-top: 2rem; display: flex; gap: 1rem; flex-wrap: wrap;">
+                    <button class="btn btn-secondary" onclick="clearHistory()">
+                        🗑️ Clear History
+                    </button>
+                    <button class="btn btn-export" onclick="exportDashboard()">
+                        ⬇️ Export Dashboard
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+       // NEW: Configure the PDF.js worker script
+if (window.pdfjsLib) {
+    pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js`;
+}
+
+ // (All your excellent JavaScript remains unchanged)
+        const ADR_DICTIONARY = [
+            { term: "death", serious: true }, { term: "cardiac arrest", serious: true }, { term: "myocardial infarction", serious: true }, { term: "heart attack", serious: true }, { term: "stroke", serious: true }, { term: "anaphylaxis", serious: true }, { term: "anaphylactic shock", serious: true }, { term: "respiratory failure", serious: true }, { term: "liver failure", serious: true }, { term: "kidney failure", serious: true }, { term: "renal failure", serious: true }, { term: "seizure", serious: true }, { term: "convulsion", serious: true }, { term: "coma", serious: true }, { term: "unconsciousness", serious: true }, { term: "hemorrhage", serious: true }, { term: "bleeding", serious: true }, { term: "thrombosis", serious: true }, { term: "embolism", serious: true }, { term: "pulmonary embolism", serious: true }, { term: "hospitalization", serious: true }, { term: "hospitalized", serious: true }, { term: "intensive care", serious: true }, { term: "life threatening", serious: true }, { term: "suicidal ideation", serious: true }, { term: "suicide attempt", serious: true }, { term: "pancytopenia", serious: true }, { term: "agranulocytosis", serious: true }, { term: "aplastic anemia", serious: true }, { term: "stevens johnson syndrome", serious: true }, { term: "toxic epidermal necrolysis", serious: true }, { term: "rhabdomyolysis", serious: true }, { term: "neuroleptic malignant syndrome", serious: true }, { term: "serotonin syndrome", serious: true }, { term: "angioedema", serious: true }, { term: "bronchospasm", serious: true }, { term: "laryngeal edema", serious: true }, { term: "hypotension", serious: true }, { term: "hypertensive crisis", serious: true }, { term: "arrhythmia", serious: true }, { term: "tachycardia", serious: true }, { term: "bradycardia", serious: true }, { term: "cardiac failure", serious: true }, { term: "heart failure", serious: true }, { term: "respiratory distress", serious: true }, { term: "dyspnea", serious: true }, { term: "acute pancreatitis", serious: true }, { term: "hepatitis", serious: true }, { term: "jaundice", serious: true }, { term: "acute kidney injury", serious: true },
+            { term: "headache", serious: false }, { term: "nausea", serious: false }, { term: "vomiting", serious: false }, { term: "dizziness", serious: false }, { term: "fatigue", serious: false }, { term: "drowsiness", serious: false }, { term: "insomnia", serious: false }, { term: "diarrhea", serious: false }, { term: "constipation", serious: false }, { term: "abdominal pain", serious: false }, { term: "stomach pain", serious: false }, { term: "rash", serious: false }, { term: "skin rash", serious: false }, { term: "itching", serious: false }, { term: "pruritus", serious: false }, { term: "dry mouth", serious: false }, { term: "blurred vision", serious: false }, { term: "weakness", serious: false }, { term: "muscle pain", serious: false }, { term: "back pain", serious: false }, { term: "joint pain", serious: false }, { term: "fever", serious: false }, { term: "chills", serious: false }, { term: "sweating", serious: false }, { term: "hot flashes", serious: false }, { term: "nervousness", serious: false }, { term: "anxiety", serious: false }, { term: "depression", serious: false }, { term: "mood changes", serious: false }, { term: "irritability", serious: false }, { term: "confusion", serious: false }, { term: "memory problems", serious: false }, { term: "concentration problems", serious: false }, { term: "tremor", serious: false }, { term: "shaking", serious: false }, { term: "restlessness", serious: false }, { term: "agitation", serious: false }, { term: "appetite loss", serious: false }, { term: "weight loss", serious: false }, { term: "weight gain", serious: false }, { term: "heartburn", serious: false }, { term: "indigestion", serious: false }, { term: "gas", serious: false }, { term: "bloating", serious: false }, { term: "dry skin", serious: false }, { term: "hair loss", serious: false }, { term: "nail changes", serious: false }, { term: "taste changes", serious: false }, { term: "metallic taste", serious: false }, { term: "smell changes", serious: false }, { term: "runny nose", serious: false }, { term: "stuffy nose", serious: false }, { term: "sneezing", serious: false }, { term: "cough", serious: false }, { term: "sore throat", serious: false }, { term: "hoarseness", serious: false }, { term: "muscle cramps", serious: false }, { term: "leg cramps", serious: false }, { term: "numbness", serious: false }, { term: "tingling", serious: false }, { term: "swelling", serious: false }, { term: "edema", serious: false }, { term: "bruising", serious: false }, { term: "redness", serious: false }, { term: "inflammation", serious: false }, { term: "pain", serious: false }, { term: "discomfort", serious: false }, { term: "burning sensation", serious: false }, { term: "cold symptoms", serious: false }, { term: "flu-like symptoms", serious: false }, { term: "malaise", serious: false }, { term: "lightheadedness", serious: false }, { term: "vertigo", serious: false }, { term: "tinnitus", serious: false }, { term: "ear ringing", serious: false }, { term: "vision problems", serious: false }, { term: "eye irritation", serious: false }, { term: "dry eyes", serious: false }, { term: "watery eyes", serious: false }, { term: "photosensitivity", serious: false }, { term: "sun sensitivity", serious: false }, { term: "flushing", serious: false }, { term: "palpitations", serious: false }, { term: "chest discomfort", serious: false }, { term: "shortness of breath", serious: false }, { term: "wheezing", serious: false }, { term: "chest tightness", serious: false }
+        ];
+        let currentAnalysis = null;
+        let caseHistory = [];
+        let caseCounter = 1;
+        document.addEventListener('DOMContentLoaded', function() {
+            loadCaseHistory();
+            updateDashboard();
+            document.getElementById('fileInput').addEventListener('change', handleFileSelect);
+        });
+        function openFilePicker() {
+            document.getElementById('fileInput').click();
+        }
+      // NEW: Upgraded function to handle both PDF and TXT files
+async function handleFileSelect(event) {
+    const file = event.target.files[0];
+    if (!file) {
+        return;
+    }
+
+    // Show loading state immediately for a better user experience
+    showLoading(true);
+    hideResults();
+
+    const caseTextContainer = document.getElementById('caseText');
+    const reader = new FileReader();
+
+    try {
+        // --- PDF HANDLING LOGIC ---
+        if (file.type === 'application/pdf' && window.pdfjsLib) {
+            reader.onload = async function() {
+                try {
+                    // Use PDF.js to load the binary data of the file
+                    const pdf = await pdfjsLib.getDocument(reader.result).promise;
+                    let fullText = '';
+
+                    // Loop through all pages of the PDF
+                    for (let i = 1; i <= pdf.numPages; i++) {
+                        const page = await pdf.getPage(i);
+                        const textContent = await page.getTextContent();
+                        fullText += textContent.items.map(item => item.str).join(' ') + '\n'; // Add newline between pages
+                    }
+
+                    fullText = fullText.replace(/\s+/g, ' ').trim(); // NEW: Normalize whitespace
+
+                    // Put the extracted text into the textarea and analyze
+                    caseTextContainer.value = fullText;
+                    analyzeCaseText();
+                } catch (error) {
+                    console.error('Error parsing PDF:', error);
+                    alert('Could not read text from this PDF. The file might be an image, corrupted, or protected.');
+                    showLoading(false);
+                }
+            };
+            // Read the file as a binary "ArrayBuffer" for PDF.js
+            reader.readAsArrayBuffer(file);
+        } 
+        // --- TXT FILE HANDLING LOGIC (FALLBACK) ---
+        else {
+            reader.onload = function(e) {
+                caseTextContainer.value = e.target.result;
+                analyzeCaseText(); // Analyze the text file content
+            };
+            reader.readAsText(file);
+        }
+    } catch (error) {
+        console.error('Error handling file:', error);
+        alert('An unexpected error occurred while processing the file.');
+        showLoading(false);
+    } finally {
+        // Clear the input value to allow selecting the same file again
+        event.target.value = '';
+    }
+}
+        function switchTab(tabName) {
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(content => content.classList.remove('active'));
+            const navTabs = document.querySelectorAll('.nav-tab');
+            navTabs.forEach(tab => tab.classList.remove('active'));
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+            if (tabName === 'dashboard') {
+                updateDashboard();
+            }
+        }
+        function analyzeCaseText() {
+            const caseId = document.getElementById('caseId').value.trim();
+            const caseText = document.getElementById('caseText').value.trim();
+            if (!caseText) {
+                alert('Please enter or upload a case narrative to analyze.');
+                return;
+            }
+            showLoading(true);
+            hideResults();
+            setTimeout(() => {
+                performADRAnalysis(caseText, caseId);
+                showLoading(false);
+                showResults();
+            }, 1500);
+        }
+        function performADRAnalysis(text, userCaseId) {
+            const detectedADRs = [];
+            const textLower = text.toLowerCase();
+            ADR_DICTIONARY.forEach(adr => {
+                const termLower = adr.term.toLowerCase();
+                const regex = new RegExp(`\\b${termLower.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'gi');
+                const matches = text.match(regex);
+                if (matches) {
+                    detectedADRs.push({
+                        term: adr.term,
+                        serious: adr.serious,
+                        matches: matches,
+                        count: matches.length
+                    });
+                }
+            });
+            const uniqueADRs = removeDuplicateADRs(detectedADRs);
+            const finalCaseId = userCaseId ? userCaseId : `CASE-${String(caseCounter).padStart(4, '0')}`;
+            currentAnalysis = {
+                id: finalCaseId,
+                timestamp: new Date(),
+                originalText: text,
+                detectedADRs: uniqueADRs,
+                totalADRs: uniqueADRs.length,
+                seriousADRs: uniqueADRs.filter(adr => adr.serious).length,
+                nonSeriousADRs: uniqueADRs.filter(adr => !adr.serious).length
+            };
+            updateAnalysisResults(currentAnalysis);
+            saveToHistory(currentAnalysis);
+            if (!userCaseId) {
+                caseCounter++;
+            }
+        }
+        function removeDuplicateADRs(adrList) {
+            adrList.sort((a, b) => b.term.length - a.term.length);
+            const uniqueADRs = [];
+            const usedTerms = new Set();
+            adrList.forEach(adr => {
+                const termLower = adr.term.toLowerCase();
+                let shouldAdd = true;
+                for (const usedTerm of usedTerms) {
+                    if (termLower.includes(usedTerm) || usedTerm.includes(termLower)) {
+                        shouldAdd = false;
+                        break;
+                    }
+                }
+                if (shouldAdd) {
+                    uniqueADRs.push(adr);
+                    usedTerms.add(termLower);
+                }
+            });
+            return uniqueADRs.sort((a, b) => {
+                if (a.serious !== b.serious) {
+                    return b.serious - a.serious;
+                }
+                return a.term.localeCompare(b.term);
+            });
+        }
+        function updateAnalysisResults(analysis) {
+            document.getElementById('totalADRs').textContent = analysis.totalADRs;
+            document.getElementById('seriousADRs').textContent = analysis.seriousADRs;
+            document.getElementById('nonSeriousADRs').textContent = analysis.nonSeriousADRs;
+            const adrListContainer = document.getElementById('adrList');
+            adrListContainer.innerHTML = '';
+            if (analysis.detectedADRs.length === 0) {
+                adrListContainer.innerHTML = '<p style="color: #6b7280; font-style: italic;">No ADRs detected in the case narrative.</p>';
+            } else {
+                analysis.detectedADRs.forEach(adr => {
+                    const adrTag = document.createElement('div');
+                    adrTag.className = `adr-tag ${adr.serious ? 'adr-serious' : 'adr-non-serious'}`;
+                    adrTag.textContent = `${adr.term}${adr.count > 1 ? ` (${adr.count})` : ''}`;
+                    adrListContainer.appendChild(adrTag);
+                });
+            }
+            const highlightedContainer = document.getElementById('highlightedText');
+            highlightedContainer.innerHTML = highlightCaseText(analysis.originalText, analysis.detectedADRs);
+        }
+        function highlightCaseText(text, adrList) {
+            let highlightedText = text;
+            const sortedADRs = [...adrList].sort((a, b) => b.term.length - a.term.length);
+            sortedADRs.forEach(adr => {
+                const regex = new RegExp(`\\b(${adr.term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})\\b`, 'gi');
+                const highlightClass = adr.serious ? 'highlight-serious' : 'highlight-non-serious';
+                highlightedText = highlightedText.replace(regex, 
+                    `<span class="${highlightClass}" title="${adr.serious ? 'Serious ADR' : 'Non-serious ADR'}">$1</span>`
+                );
+            });
+            return highlightedText;
+        }
+        function exportResults() {
+            if (!currentAnalysis || currentAnalysis.detectedADRs.length === 0) {
+                alert('No ADR analysis results to export.');
+                return;
+            }
+            const csvData = [];
+            csvData.push(['Case ID', 'ADR Term', 'Seriousness', 'Count', 'Analysis Date']);
+            currentAnalysis.detectedADRs.forEach(adr => {
+                csvData.push([
+                    currentAnalysis.id,
+                    adr.term,
+                    adr.serious ? 'Serious' : 'Non-serious',
+                    adr.count,
+                    currentAnalysis.timestamp.toLocaleDateString()
+                ]);
+            });
+            const csvString = csvData.map(row => 
+                row.map(field => `"${field}"`).join(',')
+            ).join('\n');
+            downloadCSV(csvString, `ADR_Analysis_${currentAnalysis.id}.csv`);
+        }
+        function saveToHistory(analysis) {
+            caseHistory.unshift(analysis);
+            if (caseHistory.length > 50) {
+                caseHistory = caseHistory.slice(0, 50);
+            }
+            console.log('Case saved to history:', analysis.id);
+        }
+        function loadCaseHistory() {
+            console.log('Case history loaded');
+        }
+        function updateDashboard() {
+            const totalCases = caseHistory.length;
+            const totalADRsFound = caseHistory.reduce((sum, case_) => sum + case_.totalADRs, 0);
+            const avgADRsPerCase = totalCases > 0 ? (totalADRsFound / totalCases).toFixed(1) : 0;
+            document.getElementById('dashboardTotalCases').textContent = totalCases;
+            document.getElementById('dashboardTotalADRs').textContent = totalADRsFound;
+            document.getElementById('dashboardAvgADRs').textContent = avgADRsPerCase;
+            updateCaseHistoryDisplay();
+        }
+        function updateCaseHistoryDisplay() {
+            const caseHistoryContainer = document.getElementById('caseHistory');
+            if (caseHistory.length === 0) {
+                caseHistoryContainer.innerHTML = '<p style="color: #6b7280; font-style: italic; text-align: center; padding: 2rem;">No cases analyzed yet. Use the ADR Analyzer to get started!</p>';
+                return;
+            }
+            caseHistoryContainer.innerHTML = '';
+            caseHistory.slice(0, 10).forEach(case_ => {
+                const caseItem = document.createElement('div');
+                caseItem.className = 'case-item';
+                caseItem.innerHTML = `
+                    <div class="case-header">
+                        <div class="case-id">${case_.id}</div>
+                        <div class="case-date">${case_.timestamp.toLocaleDateString()} ${case_.timestamp.toLocaleTimeString()}</div>
+                    </div>
+                    <div class="case-stats">
+                        <div class="case-stat">📊 ${case_.totalADRs} Total ADRs</div>
+                        <div class="case-stat" style="color: #dc2626;">🚨 ${case_.seriousADRs} Serious</div>
+                        <div class="case-stat" style="color: #16a34a;">✅ ${case_.nonSeriousADRs} Non-serious</div>
+                    </div>
+                    <div style="margin-top: 0.5rem; font-size: 0.9rem; color: #6b7280;">
+                        ${case_.originalText.length > 100 ? case_.originalText.substring(0, 100) + '...' : case_.originalText}
+                    </div>
+                `;
+                caseHistoryContainer.appendChild(caseItem);
+            });
+        }
+        function clearHistory() {
+            if (caseHistory.length === 0) {
+                alert('No case history to clear.');
+                return;
+            }
+            if (confirm(`Are you sure you want to clear all ${caseHistory.length} cases from history? This action cannot be undone.`)) {
+                caseHistory = [];
+                caseCounter = 1;
+                updateDashboard();
+                alert('Case history cleared successfully.');
+            }
+        }
+        function exportDashboard() {
+            if (caseHistory.length === 0) {
+                alert('No case history to export.');
+                return;
+            }
+            const csvData = [];
+            csvData.push(['Case ID', 'Analysis Date', 'Analysis Time', 'Total ADRs', 'Serious ADRs', 'Non-serious ADRs', 'Case Narrative']);
+            caseHistory.forEach(case_ => {
+                csvData.push([
+                    case_.id,
+                    case_.timestamp.toLocaleDateString(),
+                    case_.timestamp.toLocaleTimeString(),
+                    case_.totalADRs,
+                    case_.seriousADRs,
+                    case_.nonSeriousADRs,
+                    case_.originalText.replace(/"/g, '""')
+                ]);
+            });
+            const csvString = csvData.map(row => 
+                row.map(field => `"${field}"`).join(',')
+            ).join('\n');
+            const timestamp = new Date().toISOString().split('T')[0];
+            downloadCSV(csvString, `ADR_Dashboard_Export_${timestamp}.csv`);
+        }
+        function downloadCSV(csvContent, filename) {
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            if (link.download !== undefined) {
+                const url = URL.createObjectURL(blob);
+                link.setAttribute('href', url);
+                link.setAttribute('download', filename);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            } else {
+                alert('CSV export is not supported in this browser.');
+            }
+        }
+        function showLoading(show) {
+            document.getElementById('loadingState').style.display = show ? 'block' : 'none';
+        }
+        function hideResults() {
+            document.getElementById('resultsSection').style.display = 'none';
+        }
+        function showResults() {
+            document.getElementById('resultsSection').style.display = 'block';
+        }
+        document.addEventListener('DOMContentLoaded', function() {
+            const sampleText = "The patient developed severe headache and nausea after taking paracetamol. Later, dizziness and vomiting were also reported. The patient experienced fatigue and mild rash on the arms. No hospitalization was required, but the patient reported persistent insomnia and anxiety.";
+            document.getElementById('caseText').placeholder = sampleText;
+        });
+        document.addEventListener('keydown', function(event) {
+            if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
+                event.preventDefault();
+                analyzeCaseText();
+            }
+            if ((event.ctrlKey || event.metaKey) && event.key === 'e' && currentAnalysis) {
+                event.preventDefault();
+                exportResults();
+            }
+        });
+        let autoSaveTimeout;
+        document.getElementById('caseText').addEventListener('input', function() {
+            clearTimeout(autoSaveTimeout);
+            autoSaveTimeout = setTimeout(() => {
+                console.log('Auto-saving draft...');
+            }, 2000);
+        });
+        window.addEventListener('resize', function() {
+            const isMobile = window.innerWidth < 768;
+            const container = document.querySelector('.container');
+            if (isMobile) {
+                container.style.padding = '10px';
+            } else {
+                container.style.padding = '20px';
+            }
+        });
+    </script>
+</body>
+</html>

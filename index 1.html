@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ADR Case Analyzer - From Case Chaos to Analyzed Clarity</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- GSAP Libraries for Professional Animation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            overflow-x: hidden;
+        }
+        
+        /* Hero Section */
+        .hero {
+            height: 100vh;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero-content {
+            max-width: 800px;
+            padding: 0 2rem;
+            z-index: 2;
+        }
+        
+        .hero h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            animation: fadeInUp 1s ease-out;
+        }
+        
+        .hero p {
+            font-size: clamp(1.1rem, 2vw, 1.3rem);
+            margin-bottom: 2.5rem;
+            font-weight: 300;
+            line-height: 1.7;
+            animation: fadeInUp 1s ease-out 0.3s both;
+        }
+        
+        .cta-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            color: white;
+            padding: 1rem 2.5rem;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(255, 107, 107, 0.3);
+            animation: fadeInUp 1s ease-out 0.6s both;
+        }
+        
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 35px rgba(255, 107, 107, 0.4);
+        }
+        
+        /* Problem Section */
+        .problem {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 5rem 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .problem-content {
+            text-align: center;
+            max-width: 1200px;
+            padding: 0 2rem;
+        }
+        
+        .problem h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2rem, 4vw, 3.5rem);
+            margin-bottom: 3rem;
+            color: #2c3e50;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s ease;
+        }
+        
+        .problem h2.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .chaos-container {
+            position: relative;
+            height: 400px;
+            width: 100%;
+            margin: 0 auto;
+        }
+        
+        .snippet {
+            position: absolute;
+            background: white;
+            border-radius: 8px;
+            border-left: 4px solid #e74c3c;
+            padding: 1rem 1.5rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            font-size: 0.9rem;
+            color: #2c3e50;
+            max-width: 280px;
+            opacity: 0;
+            transform: scale(0) rotate(0deg);
+            transition: all 0.8s ease;
+        }
+        
+        .snippet.visible {
+            opacity: 1;
+            transform: scale(1);
+        }
+        
+        /* Solution Section */
+        .solution {
+            min-height: 100vh;
+            background: #1a1a2e;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .solution-content {
+            text-align: center;
+            color: white;
+            max-width: 1000px;
+            padding: 0 2rem;
+        }
+        
+        .solution h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2rem, 4vw, 3.5rem);
+            margin-bottom: 3rem;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s ease;
+        }
+        
+        .solution h2.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .app-mockup {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            margin: 2rem 0;
+            /* GSAP will control visibility, opacity, and transform */
+            visibility: hidden; 
+        }
+        
+        .input-area {
+            background: #f8f9fa;
+            border: 2px dashed #dee2e6;
+            border-radius: 10px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            color: #6c757d;
+            font-style: italic;
+        }
+        
+        .analyze-btn {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 0.8rem 2rem;
+            border: none;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .results-ui {
+            /* GSAP will control this element's visibility */
+        }
+
+        .result-card {
+            background: #e8f5e8;
+            border-left: 4px solid #28a745;
+            padding: 1rem;
+            margin: 0.5rem 0;
+            border-radius: 5px;
+            text-align: left;
+            color: #2c3e50;
+        }
+        
+        /* Features Section */
+        .features {
+            min-height: 100vh;
+            background: #fff0e6;
+            padding: 5rem 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .features-content {
+            max-width: 1200px;
+            padding: 0 2rem;
+            width: 100%;
+        }
+        
+        .features h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2rem, 4vw, 3.5rem);
+            text-align: center;
+            margin-bottom: 4rem;
+            color: #2c3e50;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s ease;
+        }
+        
+        .features h2.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 3rem;
+        }
+        
+        .feature-card {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            transform: translateY(50px);
+            opacity: 0;
+            transition: all 0.8s ease;
+        }
+        
+        .feature-card.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-10px);
+        }
+        
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .feature-card h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #2c3e50;
+        }
+        
+        .feature-card ul {
+            text-align: left;
+            list-style: none;
+            padding: 0;
+        }
+        
+        .feature-card li {
+            margin: 0.8rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+            color: #555;
+            line-height: 1.6;
+        }
+        
+        .feature-card li::before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #28a745;
+            font-weight: bold;
+        }
+        
+        /* Final CTA Section */
+        .final-cta {
+            height: 100vh;
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: white;
+        }
+        
+        .final-cta-content {
+            max-width: 600px;
+            padding: 0 2rem;
+        }
+        
+        .final-cta h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2.5rem, 4vw, 4rem);
+            margin-bottom: 2rem;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s ease;
+        }
+        
+        .final-cta h2.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .final-cta .cta-button {
+            font-size: 1.2rem;
+            padding: 1.2rem 3rem;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s ease 0.3s;
+        }
+        
+        .final-cta .cta-button.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        /* Footer */
+        footer {
+            background: #1a1a1a;
+            color: #ccc;
+            text-align: center;
+            padding: 2rem;
+            font-size: 0.9rem;
+        }
+        
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .chaos-container {
+                height: 300px;
+            }
+            
+            .snippet {
+                max-width: 200px;
+                padding: 0.8rem 1rem;
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>From Case Chaos to Analyzed Clarity</h1>
+            <p>Transform overwhelming pharmacovigilance narratives into structured, actionable insights with our intelligent ADR Case Analyzer.</p>
+            <a href="#problem-section" class="cta-button">Scroll Down</a>
+        </div>
+    </section>
+
+    <!-- Problem Section -->
+    <section class="problem" id="problem-section">
+        <div class="problem-content">
+            <h2>The Challenge: Raw Case Narratives are Overwhelming</h2>
+            <div class="chaos-container">
+                <div class="snippet" style="left: 10%; top: 20%; transform: rotate(-5deg);">Patient experienced severe nausea and vomiting after taking medication X for 3 days...</div>
+                <div class="snippet" style="right: 15%; top: 10%; transform: rotate(3deg);">65-year-old male reported dizziness and headache following drug Y administration...</div>
+                <div class="snippet" style="left: 20%; bottom: 30%; transform: rotate(-8deg);">Female patient, age 34, developed skin rash and itching 2 hours post-dose...</div>
+                <div class="snippet" style="right: 10%; top: 45%; transform: rotate(6deg);">Elderly patient complained of fatigue and muscle weakness after Z therapy...</div>
+                <div class="snippet" style="left: 50%; top: 5%; transform: rotate(-3deg);">30-year-old reported stomach pain and diarrhea following treatment initiation...</div>
+                <div class="snippet" style="right: 40%; bottom: 20%; transform: rotate(4deg);">Patient experienced rapid heartbeat and chest tightness during medication trial...</div>
+                <div class="snippet" style="left: 5%; top: 60%; transform: rotate(7deg);">45-year-old developed sleep disturbances and anxiety after drug adjustment...</div>
+                <div class="snippet" right: 20%; bottom: 5%; transform: rotate(-6deg);">Child patient showed signs of allergic reaction including swelling and hives...</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Solution Section -->
+    <section class="solution">
+        <div class="solution-content">
+            <h2>The Solution: Intelligent Analysis</h2>
+            <div class="app-mockup" id="inputMockup">
+                <div class="input-area">
+                    Drop your case narrative here or paste text...
+                </div>
+                <button class="analyze-btn" id="analyzeBtn">Analyze Case</button>
+            </div>
+            <div class="app-mockup results-ui" id="resultsMockup">
+                <div class="result-card">
+                    <strong>Primary ADR:</strong> Gastrointestinal Disturbance
+                </div>
+                <div class="result-card">
+                    <strong>Severity:</strong> Moderate
+                </div>
+                <div class="result-card">
+                    <strong>Causality:</strong> Probable
+                </div>
+                <div class="result-card">
+                    <strong>Timeline:</strong> 3 days post-initiation
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+        <div class="features-content">
+            <h2>Key Features</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🔒</div>
+                    <h3>Completely Offline</h3>
+                    <ul>
+                        <li>Works seamlessly without an internet connection</li>
+                        <li>No server setup or installation required</li>
+                        <li>Secure and private — everything stays on your device</li>
+                    </ul>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">🌐</div>
+                    <h3>Cross-Platform Compatible</h3>
+                    <ul>
+                        <li>Windows & Mac – Open instantly with a double-click</li>
+                        <li>Linux – Works in any modern browser</li>
+                        <li>Mobile – Add to your home screen like a native app</li>
+                        <li>Tablets – Fully responsive for a smooth experience anywhere</li>
+                    </ul>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3>Smart Dashboard</h3>
+                    <ul>
+                        <li>Every case you submit is automatically stored in your Dashboard</li>
+                        <li>Track when and what you submitted with precise date logs</li>
+                        <li>Quickly find, reuse, or reference past cases without hassle</li>
+                        <li>Export your data in CSV format for reporting, sharing, or backup</li>
+                        <li>Designed to give you clear, instant insights at a glance</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Final CTA Section -->
+    <section class="final-cta">
+        <div class="final-cta-content">
+            <h2>Ready to transform your workflow?</h2>
+            <a href="app.html" class="cta-button">Launch the Analyzer Now</a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <p>Created by Àrî (Arindam Mandal), Founder of ADR Case Analyzer</p>
+    </footer>
+
+    <script>
+        // ORIGINAL SCROLL ANIMATION SYSTEM (FOR ALL SECTIONS EXCEPT SOLUTION)
+        function isElementPartiallyInViewport(el) {
+            const rect = el.getBoundingClientRect();
+            const windowHeight = window.innerHeight || document.documentElement.clientHeight;
+            const windowWidth = window.innerWidth || document.documentElement.clientWidth;
+            
+            return (
+                rect.bottom >= windowHeight * 0.1 &&
+                rect.right >= 0 &&
+                rect.top <= windowHeight * 0.9 &&
+                rect.left <= windowWidth
+            );
+        }
+
+        const animateElements = [
+            '.problem h2',
+            '.solution h2', 
+            '.features h2',
+            '.final-cta h2',
+            '.final-cta .cta-button'
+        ];
+
+        const snippets = document.querySelectorAll('.snippet');
+        const featureCards = document.querySelectorAll('.feature-card');
+        
+        function handleScroll() {
+            animateElements.forEach(selector => {
+                const element = document.querySelector(selector);
+                if (element) {
+                    if (isElementPartiallyInViewport(element)) {
+                        element.classList.add('visible');
+                    } else {
+                        element.classList.remove('visible');
+                    }
+                }
+            });
+
+            const chaosContainer = document.querySelector('.chaos-container');
+            if (chaosContainer) {
+                if (isElementPartiallyInViewport(chaosContainer)) {
+                    snippets.forEach((snippet, index) => {
+                        setTimeout(() => {
+                            snippet.classList.add('visible');
+                        }, index * 100);
+                    });
+                } else {
+                    snippets.forEach(snippet => {
+                        snippet.classList.remove('visible');
+                    });
+                }
+            }
+
+            const featuresGrid = document.querySelector('.features-grid');
+            if (featuresGrid) {
+                if (isElementPartiallyInViewport(featuresGrid)) {
+                    featureCards.forEach((card, index) => {
+                        setTimeout(() => {
+                            card.classList.add('visible');
+                        }, index * 200);
+                    });
+                } else {
+                    featureCards.forEach(card => {
+                        card.classList.remove('visible');
+                    });
+                }
+            }
+        }
+
+        // Add hover effects
+        document.querySelectorAll('.cta-button').forEach(button => {
+            button.addEventListener('mouseenter', () => {
+                button.style.transform = 'translateY(-2px) scale(1.05)';
+            });
+            
+            button.addEventListener('mouseleave', () => {
+                button.style.transform = 'translateY(-2px) scale(1)';
+            });
+        });
+
+        window.addEventListener('scroll', handleScroll);
+        window.addEventListener('load', handleScroll);
+        handleScroll();
+
+        // --- NEW GSAP-POWERED SOLUTION ANIMATION (THE FIX) ---
+        gsap.registerPlugin(ScrollTrigger);
+
+        const solutionSection = document.querySelector('.solution');
+        const inputMockup = document.querySelector('#inputMockup');
+        const resultsMockup = document.querySelector('#resultsMockup');
+        const analyzeBtn = document.querySelector('#analyzeBtn');
+
+        // Set initial states with GSAP for a clean start
+        gsap.set(inputMockup, { autoAlpha: 0, scale: 0.8 });
+        gsap.set(resultsMockup, { autoAlpha: 0, scale: 0.8 });
+
+        // Create the animation timeline
+        const solutionTimeline = gsap.timeline({ paused: true });
+
+        solutionTimeline
+            // 1. Fade in the input mockup
+            .to(inputMockup, {
+                autoAlpha: 1, // Fades in and sets visibility
+                scale: 1,
+                duration: 0.8,
+                ease: "power2.out"
+            })
+            // 2. Simulate button click with a slight pause
+            .to(analyzeBtn, {
+                scale: 0.95,
+                duration: 0.1,
+                repeat: 1,
+                yoyo: true, // Animates back to original scale
+                ease: "power1.inOut"
+            }, "+=0.5") // Delay this step by 0.5s after the previous one ends
+            // 3. Fade out the input mockup
+            .to(inputMockup, {
+                autoAlpha: 0,
+                scale: 0.8,
+                duration: 0.6,
+                ease: "power2.in"
+            }, "+=0.3") // Delay this step by 0.3s after the click
+            // 4. Fade in the results mockup
+            .to(resultsMockup, {
+                autoAlpha: 1,
+                scale: 1,
+                duration: 0.8,
+                ease: "back.out(1.7)"
+            });
+
+        // Attach the timeline to the ScrollTrigger
+        ScrollTrigger.create({
+            trigger: solutionSection,
+            start: "top center", // Trigger when the top of the section hits the center of the viewport
+            end: "bottom center",
+            animation: solutionTimeline,
+            toggleActions: "play none none reset", // Plays on enter, resets if you scroll back up past it
+        });
+
+    </script>
+</body>
+</html>
