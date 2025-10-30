@@ -1,4 +1,4 @@
-# ADR Case Analyzer - by Àrî
+# ADR Case Analyzer -
 
 ### A professional, offline-first tool for analyzing pharmacovigilance case narratives, complete with a modern marketing website.
 
